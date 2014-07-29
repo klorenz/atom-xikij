@@ -2,7 +2,7 @@
   "name": "atom-xikij",
   "main": "./lib/xikij",
   "version": "0.1.1",
-  "description": "A short description of your package",
+  "description": "A xiki clone for atom",
   "activationEvents": [
     "xikij:toggle"
   ],
