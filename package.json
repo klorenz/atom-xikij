@@ -3,9 +3,6 @@
   "main": "./lib/xikij",
   "version": "0.2.0",
   "description": "A xiki clone for atom",
-  "activationEvents": [
-    "xikij:toggle"
-  ],
   "repository": "https://github.com/klorenz/atom-xikij",
   "license": "MIT",
   "engines": {

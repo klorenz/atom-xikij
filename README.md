@@ -4,10 +4,6 @@ Xikij is a xiki clone for atom under very development.  So this is not
 intended for use, rather for playing around a bit, and see what there
 will be possible soon
 
-Turn on xiki for this window:
-
-  strg-shift-P -> Xikij: Toggle
-
 And then hit ctrl-enter on the lines
 
   $ echo "hello world"

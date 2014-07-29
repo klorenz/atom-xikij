@@ -1,11 +1,3 @@
-###
-hostname
-
-/home/kiwi/work
-  $ ls
-
-###
-
 {XikijClient, Xikij, util} = require "xikij"
 
 INDENT = "  "
@@ -26,6 +18,8 @@ module.exports =
 
     atom.workspaceView.command "xikij:toggle-content-with-input", =>
       @toggleContent withInput: true
+
+    @toggle()
 
   isProcessing: ->
     for k,v of @processing
@@ -77,10 +71,14 @@ module.exports =
           curIndent += 1
 
           @_handleRequest cursor, editor, body, "collapse", (request, response, done) =>
-            console.log "->", response
+            buffer = editor.getBuffer()
+            line   = buffer.getTextInRange(request.range)
+            indent = util.getIndent line
+
+            if line[indent.length..indent.length] == "-"
+              buffer.setTextInRange(request.range, indent+"+"+line[indent.length+1..])
 
             endRow = startRow+1
-            console.log "endRow", endRow
             loop
               endRow++
               break if endRow >= editor.getLineCount()
@@ -95,8 +93,12 @@ module.exports =
           continue
 
       @_handleRequest cursor, editor, body, "expand", (request, response, done) =>
-        line = editor.lineForBufferRow cursor.getBufferRow()
+        buffer = editor.getBuffer()
+        line   = buffer.getTextInRange(request.range)
         indent = util.getIndent line
+
+        if line[indent.length..indent.length] == "+"
+          buffer.setTextInRange(request.range, indent+"-"+line[indent.length+1..])
 
         if response.type is "stream"
           isFirst = true
