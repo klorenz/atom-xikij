@@ -1,6 +1,14 @@
-#XikijView = require './xikij-view'
+###
+hostname
 
-{XikijClient, Xikij} = require "xikij"
+/home/kiwi/work
+  $ ls
+
+###
+
+{XikijClient, Xikij, util} = require "xikij"
+
+INDENT = "  "
 
 module.exports =
   xikijView: null
@@ -66,6 +74,7 @@ module.exports =
       if startRow+1 < editor.getLineCount() and not withInput
         curIndent = editor.indentationForBufferRow(startRow)
         if curIndent < editor.indentationForBufferRow(startRow+1)
+          curIndent += 1
 
           @_handleRequest cursor, editor, body, "collapse", (request, response, done) =>
             console.log "->", response
@@ -79,35 +88,56 @@ module.exports =
               continue if editor.lineForBufferRow(endRow) == ""
               break if curIndent > editor.indentationForBufferRow(endRow)
 
-            console.log "delete rows", startRow+1, endRow-1
             editor.getBuffer().deleteRows(startRow+1, endRow-1)
-            console.log editor.getText()
 
             done()
 
           continue
 
       @_handleRequest cursor, editor, body, "expand", (request, response, done) =>
-        
+        line = editor.lineForBufferRow cursor.getBufferRow()
+        indent = util.getIndent line
+
         if response.type is "stream"
           isFirst = true
-          response.data
-            .on "data", (data) ->
-              if isFirst
-                prefix = "  "
-                isFirst = false
-              else
-                prefix = ""
+          buffer = editor.getBuffer()
 
-              text = prefix + data.toString().replace "\n", "\n  "
-              editor.getBuffer().insert(request.range.end, text)
+          row = request.range.end.row
+          if buffer.lineEndingForRow(request.range.end.row) is ""
+            buffer.insert(request.range.end, "\n")
+            request.range.end.column += 1
+            row = request.range.end.row+1
+          col = 0
+
+          hadLF = false
+
+          util.indented(response.data, "#{indent}#{INDENT}")
+            .on "data", (data) ->
+              data = data.toString()
+
+              console.log "point", [row, col]
+              console.log "point", [row, col]
+              console.log "data", data
+
+              buffer.insert([row, col], data)
+
+              if /\n/.test data
+                m = /\n(.*)$/.exec data
+                col = m[1].length
+                row += data.match(/\n/g).length
+              else
+                col = data.length
+
+              hadLF = /\n$/.test data
 
             .on "end", ->
-              debugger
-              request.cursor.setBufferPosition request.args.position
+              unless hadLF
+                buffer.insert([row, col], "\n")
+              # request.cursor.setBufferPosition request.args.position
               done()
         else
-          text = "  "+response.data.toString().replace "\n", "\n  "
+          text = util.indented(response.data, "#{indent}#{INDENT}")
+          text += "\n" unless /\n$/.test text
           editor.getBuffer().insert(request.range.end, text)
           done()
         # unless line does not end with newline, insert it herekjk

@@ -100,8 +100,10 @@ describe "Xikij", ->
           not xikij.isProcessing()
 
         runs ->
-          expect editor.getText()
-            .toBe """
+          expected =  """
               $ echo "hello world"
                 hello world\n
             """
+          text = editor.getText()
+          expect text
+            .toEqual expected
