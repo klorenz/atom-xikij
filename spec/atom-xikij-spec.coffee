@@ -83,7 +83,36 @@ describe "Xikij", ->
           expect editor.getText()
             .toBe """
               - first line
+                + second line\n
+            """
+
+    it "collapses lines", ->
+      runs ->
+        editor.insertText """
+          - first line
+            - second line
+              here is some
+                 indented
+
+              input, with an empty line
+              in-between\n
+          """
+        editor.setCursorBufferPosition([2,0])
+
+        atom.workspaceView.trigger "xikij:toggle-content"
+
+        waitsFor ->
+          not xikij.isProcessing()
+
+        runs ->
+          expect editor.getText()
+            .toBe """
+              - first line
                 - second line
+                  here is some
+
+                  input, with an empty line
+                  in-between\n
             """
 
     it "can execute commands", ->

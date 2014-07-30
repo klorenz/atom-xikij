@@ -59,7 +59,8 @@ module.exports =
 
         xikiNodePath.unshift line
 
-        continue if /^\s*$/.test line
+        if /^\s*$/.test line
+          continue
 
         break if editor.indentationForBufferRow(curRow) == 0
 
@@ -79,12 +80,19 @@ module.exports =
               buffer.setTextInRange(request.range, indent+"+"+line[indent.length+1..])
 
             endRow = startRow+1
+            wasEmpty = false
             loop
               endRow++
               break if endRow >= editor.getLineCount()
 
-              continue if editor.lineForBufferRow(endRow) == ""
+              if editor.lineForBufferRow(endRow) == ""
+                wasEmpty = true
+                continue
+
               break if curIndent > editor.indentationForBufferRow(endRow)
+              wasEmpty = false
+
+            endRow-- if wasEmpty
 
             editor.getBuffer().deleteRows(startRow+1, endRow-1)
 
