@@ -15,7 +15,7 @@ describe "Xikij", ->
 
   describe "when the xikij:toggle event is triggered", ->
     it "attaches and then detaches the view", ->
-      expect(atom.workspaceView.find('.xikij')).not.toExist()
+      #expect(atom.workspaceView.find('.xikij')).not.toExist()
 
       # This is an activation event, triggering it will cause the package to be
       # activated.
@@ -25,9 +25,9 @@ describe "Xikij", ->
         activationPromise
 
       runs ->
-        expect(atom.workspaceView.hasClass('xikij')).toBe true
-        atom.workspaceView.trigger 'xikij:toggle'
         expect(atom.workspaceView.hasClass('xikij')).toBe false
+        atom.workspaceView.trigger 'xikij:toggle'
+        expect(atom.workspaceView.hasClass('xikij')).toBe true
 
   describe "basic features", ->
     editor = null
@@ -42,7 +42,9 @@ describe "Xikij", ->
       waitsForPromise ->
         xikij = activationPromise.valueOf().mainModule
         filename = "#{__dirname}/fixtures/newfile.md"
-        atom.workspace.open(filename).then (o) -> editor = o
+        atom.workspace.open(filename).then (o) ->
+          editor = o
+          editor.getBuffer().setText("")
 
 
     it "runs xiki and inserts its output into lines after request line", ->
@@ -50,7 +52,10 @@ describe "Xikij", ->
       runs ->
         editor.insertText "hostname\n"
         editor.setCursorBufferPosition([0,0])
-        atom.workspaceView.trigger 'xikij:toggle-content'
+
+        debugger
+
+        atom.workspaceView.trigger 'xikij:run'
 
         waitsFor ->
           not xikij.isProcessing()
@@ -74,7 +79,7 @@ describe "Xikij", ->
           """
         editor.setCursorBufferPosition([1,0])
 
-        atom.workspaceView.trigger "xikij:toggle-content"
+        atom.workspaceView.trigger "xikij:run"
 
         waitsFor ->
           not xikij.isProcessing()
@@ -99,7 +104,7 @@ describe "Xikij", ->
           """
         editor.setCursorBufferPosition([2,0])
 
-        atom.workspaceView.trigger "xikij:toggle-content"
+        atom.workspaceView.trigger "xikij:run"
 
         waitsFor ->
           not xikij.isProcessing()
@@ -123,7 +128,7 @@ describe "Xikij", ->
         """
         editor.setCursorBufferPosition([0,0])
 
-        atom.workspaceView.trigger "xikij:toggle-content"
+        atom.workspaceView.trigger "xikij:run"
 
         waitsFor ->
           not xikij.isProcessing()
@@ -136,3 +141,20 @@ describe "Xikij", ->
           text = editor.getText()
           expect text
             .toEqual expected
+
+    it "can process input", ->
+      runs ->
+        text = """
+          $ cat
+            hello world\n
+        """
+        editor.insertText text
+        editor.setCursorBufferPosition([0,0])
+
+        atom.workspaceView.trigger "xikij:run-with-input"
+
+        waitsFor ->
+          not xikij.isProcessing()
+
+        runs ->
+          expect(editor.getText()).toEqual text

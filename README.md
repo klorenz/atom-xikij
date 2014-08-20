@@ -5,23 +5,26 @@ Xikij is a xiki clone for atom under very development.
 
 ## working features
 
-- file browsing with absolute paths.  E.g. hit ctrl-enter on following line:
-
+- file browsing with absolute paths.  E.g. hit `ctrl-enter` on following line:
+  ```
   /home
+  ```
 
-- program execution works.  E.g. hit ctrl-enter on following line:
-
+- program execution works.  E.g. hit `ctrl-enter` on following line:
+  ```
   $ ps -ef
+  ```
 
-- nested contexts work.  Hit ctrl-enter on `$ ls` line:
-
+- nested contexts work.  Hit `ctrl-enter` on `$ ls` line:
+  ```
   /home
     $ ls
+  ```
 
 - menus work, for now only this implemented completly:
-
+  ```
   hostname
-
+  ```
 
 ## Changelog
 

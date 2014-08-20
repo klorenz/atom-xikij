@@ -7,7 +7,6 @@ class XikijView extends View
       @div "The Xikij package is Alive! It's ALIVE!", class: "message"
 
   initialize: (serializeState) ->
-    atom.workspaceView.command "xikij:toggle", => @toggle()
 
   # Returns an object that can be retrieved when package is activated
   serialize: ->
@@ -18,9 +17,9 @@ class XikijView extends View
 
   toggle: ->
     console.log "XikijView was toggled!"
-    # if @hasParent()
-    #   @detach()
-    # else
-    #   atom.workspaceView.append(this)
-    
+    if @hasParent()
+       @detach()
+    else
+       atom.workspaceView.append(this)
+
     atom.workspaceView.getActiveView()
