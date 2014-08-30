@@ -9,7 +9,7 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "xikij": "*",
-    "uuid": "^1.4.1"
+    "uuid": "^1.4.1",
+    "xikij": "*"
   }
 }
