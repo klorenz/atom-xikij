@@ -85,7 +85,6 @@ class EditorRequest
   # collapse request handler
   collapse: ->
     @request "collapse", (response, done) =>
-      debugger
       @markLine("-", "+")
       collapseRange = @getIndentedRange(@startRow+1, @editor)
       @buffer.delete(collapseRange)
