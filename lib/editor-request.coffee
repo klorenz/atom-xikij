@@ -143,7 +143,7 @@ class EditorRequest
 
   apply_object: (response, done) ->
     result = ""
-    for k,v of response.data
+    for k in _.keys(response.data).sort()
       result += "+ .#{k}\n"
 
     text = util.indented(result, "#{@indent}#{INDENT}")
