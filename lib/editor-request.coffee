@@ -137,9 +137,29 @@ class EditorRequest
         # request.cursor.setBufferPosition request.args.position
         done()
 
-  apply_object: (response, done) ->
+  apply_action: (response, done) ->
     if response.data.action is "message"
       alert(response.data.message)
+
+  apply_object: (response, done) ->
+    result = ""
+    for k,v of response.data
+      result += "+ .#{k}\n"
+
+    text = util.indented(result, "#{@indent}#{INDENT}")
+    text += "\n" unless /\n$/.test text
+    @buffer.insert(@range.end, text)
+    done()
+
+  apply_array: (response, done) ->
+    result = ""
+    for e in response.data
+      result += "+ #{e}\n"
+
+    text = util.indented(result, "#{@indent}#{INDENT}")
+    text += "\n" unless /\n$/.test text
+    @buffer.insert(@range.end, text)
+    done()
 
   apply_default: (response, done) ->
     text = util.indented(response.data, "#{@indent}#{INDENT}")
@@ -147,7 +167,14 @@ class EditorRequest
     @buffer.insert(@range.end, text)
     done()
 
+  apply_error: (response, done) ->
+    text = util.indented(response.data.stack, "#{@indent}#{INDENT}! ")
+    text += "\n" unless /\n$/.test text
+    @buffer.insert(@range.end, text)
+    done()
+
   applyResponse: (response, done) ->
+    console.log "response (#{response.type})", response
     handler = "apply_#{response.type}"
     if handler of @
       @[handler] response, done
@@ -156,12 +183,13 @@ class EditorRequest
 
   # run editor request having @cursor of @editor at @startRow
   run: ->
+    console.log "run"
     xikiNodePath = []
     startRow = @startRow
     row = @startRow
     until row < 0
       curRow = row--
-      line = @editor.lineForBufferRow(curRow)
+      line = @editor.lineTextForBufferRow(curRow)
 
       xikiNodePath.unshift line
 
