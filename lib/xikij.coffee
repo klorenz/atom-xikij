@@ -1,10 +1,16 @@
 {XikijClient, Xikij, util} = require "xikij"
 {EditorRequest} = require './editor-request'
+fs = require 'atom'
 
 INDENT = "  "
 
+getUserHome = () -> process.env.HOME || process.env.USERPROFILE
+
 module.exports =
-  xikijView: null
+  configDefaults:
+    userDir:             getUserHome()
+    xikijUserDirName:    ".xikij"
+    xikijProjectDirName: ".xikij"
 
   activate: (state) ->
     @xikij = null

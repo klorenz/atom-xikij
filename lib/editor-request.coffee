@@ -1,5 +1,6 @@
 {util} = require 'xikij'
 uuid = require 'uuid'
+{extend,keys} = require "underscore"
 
 INDENT = "  "
 
@@ -16,6 +17,8 @@ class EditorRequest
       position: @cursor.getBufferPosition()
     }
 
+    extend(args, atom.config.get('atom-xikij'))
+
     for k,v of @args
       args[k] = v
 
@@ -27,11 +30,18 @@ class EditorRequest
     @id = uuid.v4()
     @atomXikij.processing[@id] = @
 
+    @body = "" unless @body
+
     @atomXikij.request {@body, args, action}, (response) =>
+      unless @body
+        response.indent = ""
+      else
+        response.indent = INDENT
+
       callback response, =>
         # console.log response
         # text = "  "+response.data.replace "\n", "\n  "
-        # editor.getBuffer().insert(range.end, text)
+        # editor.getBuffer().insert(range.end, text
         @mark.destroy()
         delete @atomXikij.processing[@id]
 
@@ -58,6 +68,7 @@ class EditorRequest
     startRow = aRow
     if @buffer.lineForRow(startRow).match /^\s*$/
       row = @buffer.nextNonBlankRow(startRow)
+      console.log("nextNonBlankRow", startRow, row)
     else
       row = startRow
 
@@ -72,6 +83,10 @@ class EditorRequest
       break if indentation > @editor.indentationForBufferRow(nextRow)
       row = nextRow
 
+    if nextRow
+     if nextRow-1 > row
+       row += 1
+
     while startRow > 0
       nextRow = @buffer.previousNonBlankRow(startRow)
       break unless nextRow
@@ -80,6 +95,7 @@ class EditorRequest
 
     range = @buffer.rangeForRow(row, yes)
     range.start.row = startRow
+    console.log "range", range
     range
 
   # collapse request handler
@@ -116,7 +132,7 @@ class EditorRequest
     col = 0
     hadLF = false
 
-    util.indented(response.data, "#{@indent}#{INDENT}")
+    util.indented(response.data, "#{@indent}#{response.indent}")
       .on "data", (data) =>
         data = data.toString()
 
@@ -133,7 +149,7 @@ class EditorRequest
 
       .on "end", =>
         unless hadLF
-          buffer.insert([row, col], "\n")
+          @buffer.insert([row, col], "\n")
         # request.cursor.setBufferPosition request.args.position
         done()
 
@@ -143,10 +159,10 @@ class EditorRequest
 
   apply_object: (response, done) ->
     result = ""
-    for k in _.keys(response.data).sort()
+    for k in keys(response.data).sort()
       result += "+ .#{k}\n"
 
-    text = util.indented(result, "#{@indent}#{INDENT}")
+    text = util.indented(result, "#{@indent}#{response.indent}")
     text += "\n" unless /\n$/.test text
     @buffer.insert(@range.end, text)
     done()
@@ -156,19 +172,21 @@ class EditorRequest
     for e in response.data
       result += "+ #{e}\n"
 
-    text = util.indented(result, "#{@indent}#{INDENT}")
+    text = util.indented(result, "#{@indent}#{response.indent}")
     text += "\n" unless /\n$/.test text
     @buffer.insert(@range.end, text)
     done()
 
   apply_default: (response, done) ->
-    text = util.indented(response.data, "#{@indent}#{INDENT}")
+    return done() unless response.data
+
+    text = util.indented(response.data, "#{@indent}#{response.indent}")
     text += "\n" unless /\n$/.test text
     @buffer.insert(@range.end, text)
     done()
 
   apply_error: (response, done) ->
-    text = util.indented(response.data.stack, "#{@indent}#{INDENT}! ")
+    text = util.indented(response.data.stack, "#{@indent}#{response.indent}! ")
     text += "\n" unless /\n$/.test text
     @buffer.insert(@range.end, text)
     done()
@@ -187,6 +205,11 @@ class EditorRequest
     xikiNodePath = []
     startRow = @startRow
     row = @startRow
+
+    unless @withInput
+      line = @editor.lineTextForBufferRow(startRow)
+      return @expand() if line is ""
+
     until row < 0
       curRow = row--
       line = @editor.lineTextForBufferRow(curRow)
@@ -201,10 +224,44 @@ class EditorRequest
     bodyRow = @startRow - curRow
     @body = xikiNodePath.join("\n")+"\n"
 
+    nextNonBlankRow = @buffer.nextNonBlankRow(@startRow+1)
+
+    curIndent  = @editor.indentationForBufferRow(@startRow)
+
+    if @startRow+1 < @editor.getLineCount()
+      nextIndent = @editor.indentationForBufferRow(@startRow+1)
+      nextLine   = @editor.lineTextForBufferRow(@startRow+1)
+    else
+      nextIndent = curIndent
+      nextNoneBlankRow = @startRow
+
+    if nextNonBlankRow
+      nonbIndent = @editor.indentationForBufferRow(nextNonBlankRow)
+    else
+      nonbIndent = nextIndent
+      nextNonBlankRow = @startRow
+
+
+    console.log "curIndent", curIndent
+    console.log "nextIndent", nextIndent
+    console.log "nonbIndent", nonbIndent
+    console.log "nextNonBlankRow", nextNonBlankRow
+
+    return @expand() if curIndent == nextIndent
+
+    if nextIndent > nonbIndent
+      if nextLine.match /^\s*$/
+        return @expand()
+
+      nextNonBlankRow = @startRow + 1
+
+    console.log "startRow", startRow
+    console.log "nextNonBlankRow", nextNonBlankRow
+
     # collapse - if requested
     if @startRow+1 < @editor.getLineCount() and not @withInput
       @curIndent = @editor.indentationForBufferRow(@startRow)
-      if @curIndent < @editor.indentationForBufferRow(@startRow+1)
+      if @curIndent < @editor.indentationForBufferRow(nextNonBlankRow)
         @curIndent += 1
 
         return @collapse()
@@ -212,7 +269,7 @@ class EditorRequest
     # expand - with input
     if @startRow+1 < @editor.getLineCount() and @withInput
       @curIndent = @editor.indentationForBufferRow(@startRow)
-      if @curIndent < @editor.indentationForBufferRow(@startRow+1)
+      if @curIndent < @editor.indentationForBufferRow(nextNonBlankRow)
         @inputRange = @getIndentedRange(@startRow+1)
 
         if @inputRange?
@@ -223,6 +280,7 @@ class EditorRequest
 
         return @expandWithInput()
 
+    # expand
     return @expand()
 
 module.exports = {EditorRequest}
