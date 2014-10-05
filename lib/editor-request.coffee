@@ -24,6 +24,7 @@ class EditorRequest
 
     @range  = @cursor.getCurrentLineBufferRange includeNewline: yes
     @mark   = @editor.markBufferRange(@range)
+    @decoration = @editor.decorateMarker(@mark, {type: 'line', class: 'xikij-request'})
     @line   = @buffer.getTextInRange(@range)
     @indent = util.getIndent @line
 
@@ -131,6 +132,8 @@ class EditorRequest
 
     col = 0
     hadLF = false
+
+    #whitespace = ""
 
     util.indented(response.data, "#{@indent}#{response.indent}")
       .on "data", (data) =>
