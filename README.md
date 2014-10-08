@@ -55,3 +55,9 @@ A short description of your package.
 1. open CHANGELOG.md
 2. type your project folder
 3. go one line below and indented you type `$ git log --oneline` hit `ctrl-enter`
+
+
+TODO
+
+- if changed indentation of marked block of running command, future indentation
+  of command must be correct.

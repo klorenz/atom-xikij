@@ -1,0 +1,361 @@
+'name': 'Xikij'
+'scopeName': 'source.xikij'
+'injectionSelector': 'text, source'
+'macros':
+  'lbNoBackslash': '(?<!\\\\)'
+  'laNotIndented': '(?!\\1\\s|\\n)'
+  'lbLeftPathSep': '(?<=/|\\s)'
+'patterns': [
+  {
+    'match': '^(\\s*)(\\+)\\s(.*)$'
+    'captures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+  }
+  {
+    'begin': '^(\\s*)(~~|~)(?=\\/|$)'
+    'beginCaptures':
+      '2':
+        'name': 'variable.language.xikij'
+    'end': '^(?!\\1\\s|\\n)'
+    'patterns': [
+      {
+        'include': '#xikijPath'
+      }
+    ]
+  }
+  {
+    'begin': '^(\\s*)(\\.\\.)(?=\\/|$)'
+    'beginCaptures':
+      '2':
+        'name': 'constant.directory.parent.xikij'
+    'end': '^(?!\\1\\s|\\n)'
+    'patterns': [
+      {
+        'include': '#xikijPath'
+      }
+    ]
+  }
+  {
+    'begin': '^(\\s*)(\\.)(?=\\/|$)'
+    'beginCaptures':
+      '2':
+        'name': 'constant.directory.current.xikij'
+    'end': '^(?!\\1\\s|\\n)'
+    'patterns': [
+      {
+        'include': '#xikijPath'
+      }
+    ]
+  }
+  {
+    'match': '^\\s*(\\/.*)$'
+    'captures':
+      '1':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+  }
+  {
+    'include': '#shellCommand'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.python.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.py$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.python'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.coffee.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.coffee$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.coffee'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.coffee.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.cson$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.coffee'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.json.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.json$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.json'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.c++.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.(cc|cxx|cpp|hh|hxx|hpp|inc|inl|imp|impl)$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.c++'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.c.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.(c|h)$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.c'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.text.restructuredtext.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.rst$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'text.restructuredtext'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.shell.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.sh$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.shell'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.ruby.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.rb$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.ruby'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.makefile.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.mak$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.makefile'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.css.less.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.less$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.css.less'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'match': '^(\\s*)(-)\\s(.*)$'
+    'captures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+  }
+]
+'repository':
+  'xikijPath':
+    'patterns': [
+      {
+        'match': '(\\/)'
+        'name': 'punctuation.separator.path.xikij'
+      }
+      {
+        'match': '(?<=/|\\s)(\\.\\.)(?=\\/|$)'
+        'name': 'constant.directory.parent.xikij'
+      }
+      {
+        'match': '(?<=/|\\s)(\\.)(?=\\/|$)'
+        'name': 'constant.directory.current.xikij'
+      }
+      {
+        'match': '(?<=/|\\s)(\\.\\w+)(?=\\/|$)'
+        'name': 'variable.language.xikij'
+      }
+      {
+        'match': '(\\[)(\\d+)(\\])(?=\\/|$)'
+        'captures':
+          '1':
+            'name': 'punctuation.definition.list.begin.xikij'
+          '2':
+            'name': 'constant.numeric.integer.xikij'
+          '3':
+            'name': 'punctuation.definition.list.end.xikij'
+        'name': 'meta.structure.list.xikij'
+      }
+    ]
+  'shellCommand':
+    'patterns': [
+      {
+        'begin': '^(\\s*)(\\$)\\s(.*)'
+        'beginCaptures':
+          '2':
+            'name': 'keyword.operator.xikij'
+          '3':
+            'name': 'meta.command.xikij'
+            'patterns': [
+              {
+                'include': 'source.shell'
+              }
+              {
+                'match': '\\s(--?)([\\w\\-]+)(=)?'
+                'captures':
+                  '1':
+                    'name': 'keyword.operator.xikij'
+                  '2':
+                    'name': 'variable.parameter.function.xikij'
+                  '3':
+                    'name': 'keyword.operator.assignment.xikij'
+              }
+            ]
+        'end': '^(?!\\1\\s)'
+        'patterns': [
+          {
+            'include': '#shellCommandOutput'
+          }
+        ]
+      }
+    ]
+  'shellCommandOutput':
+    'patterns': [
+      {
+        'match': '(?i).*\\berror\\b.*'
+        'name': 'error.xikij'
+      }
+    ]

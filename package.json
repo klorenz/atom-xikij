@@ -12,5 +12,10 @@
     "underscore": "^1.7.0",
     "uuid": "^1.4.1",
     "xikij": "*"
+  },
+  "devDependencies": {
+    "atom-syntax-tools": "^0.2.0",
+    "coffee-script": "^1.8.0",
+    "season": "^2.0.0"
   }
 }
