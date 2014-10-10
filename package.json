@@ -11,7 +11,7 @@
   "dependencies": {
     "underscore": "^1.7.0",
     "uuid": "^1.4.1",
-    "xikij": "^0.7.6"
+    "xikij": "^0.7.8"
   },
   "devDependencies": {
     "atom-syntax-tools": "^0.2.0",
