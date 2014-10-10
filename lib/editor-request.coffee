@@ -207,25 +207,13 @@ class EditorRequest
     console.log "run"
     xikiNodePath = []
     startRow = @startRow
-    row = @startRow
 
     unless @withInput
       line = @editor.lineTextForBufferRow(startRow)
       return @expand() if line is ""
 
-    until row < 0
-      curRow = row--
-      line = @editor.lineTextForBufferRow(curRow)
-
-      xikiNodePath.unshift line
-
-      if /^\s*$/.test line
-        continue
-
-      break if @editor.indentationForBufferRow(curRow) == 0
-
-    bodyRow = @startRow - curRow
-    @body = xikiNodePath.join("\n")+"\n"
+    @body   = @atomXikij.getBody(@startRow, @editor)
+    bodyRow = (@body.match /\n/g).length
 
     nextNonBlankRow = @buffer.nextNonBlankRow(@startRow+1)
 

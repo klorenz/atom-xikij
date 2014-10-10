@@ -47,8 +47,53 @@ module.exports =
       $wv.addClass "xikij"
       @xikij = new XikijClient
 
-  request: (args...) ->
-    @xikij.request args...
+  request: (request, args...) ->
+    request.args = {} unless request.args?
+    unless request.args.filePath?
+      request.args.filePath = atom.workspace.getActiveEditor().getPath()
+
+    @xikij.request request, args...
+
+  getBody: (row, opts={}) ->
+    editor   = opts.editor ? atom.workspace.getActiveEditor()
+    startRow = row
+
+    xikiNodePath = []
+
+    until row < 0
+      curRow = row--
+      line = editor.lineTextForBufferRow(curRow)
+
+      xikiNodePath.unshift line
+
+      if /^\s*$/.test line
+        continue
+
+      break if editor.indentationForBufferRow(curRow) == 0
+
+    return xikiNodePath.join("\n")+"\n"
+
+    # buffer = editor.getBuffer()
+    #
+    # nextNonBlankRow = buffer.nextNonBlankRow(startRow+1)
+    #
+    # curIndent  = editor.indentationForBufferRow(startRow)
+    #
+    # if startRow+1 < editor.getLineCount()
+    #   nextIndent = editor.indentationForBufferRow(startRow+1)
+    #   nextLine   = editor.lineTextForBufferRow(startRow+1)
+    # else
+    #   nextIndent = curIndent
+    #   nextNoneBlankRow = startRow
+    #
+    # if nextNonBlankRow
+    #   nonbIndent = editor.indentationForBufferRow(nextNonBlankRow)
+    # else
+    #   nonbIndent = nextIndent
+    #   nextNonBlankRow = startRow
+
+
+
 
   gotoLevelUp: ->
     editor = atom.workspace.getActiveEditor()
