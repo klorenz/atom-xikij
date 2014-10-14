@@ -1,7 +1,8 @@
 """
-$ npm install atom-syntax-tools
 
 $ coffee grammar-xikij.coffee
+
+../../filter-lines
 
 """
 
@@ -59,31 +60,38 @@ grammar =
           p: "#xikijPath"
     }
     {
-      b: /^(\s*)(~~|~)(?=\/|$)/
+      m: /^(\s*)(~~|~)(\/.*|$)/
       c:
         2: "variable.language"
-      e: /^{laNotIndented}/
-      p: "#xikijPath"
+        3:
+          p: "#xikijPath"
     }
     {
-      b: /^(\s*)(\.\.)(?=\/|$)/
+      m: /^(\s*)(\.\.)(\/.*|$)/
       c:
         2: "constant.directory.parent"
-      e: /^{laNotIndented}/
-      p: "#xikijPath"
+        3:
+          p: "#xikijPath"
     }
     {
-      b: /^(\s*)(\.)(?=\/|$)/
+      m: /^(\s*)(\.)(\/.*|$)/
       c:
         2: "constant.directory.current"
-      e: /^{laNotIndented}/
-      p: "#xikijPath"
+        3:
+          p: "#xikijPath"
     }
     {
       m: /^\s*(\/.*)$/
       c:
         1:
           p: "#xikijPath"
+    }
+
+    {
+      m: /^\s*((!) .*)/
+      c:
+        1: "keyword.operator"
+        2: "error.exception"
     }
 
     "#shellCommand"

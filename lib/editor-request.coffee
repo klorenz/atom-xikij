@@ -213,7 +213,7 @@ class EditorRequest
       return @expand() if line is ""
 
     @body   = @atomXikij.getBody(@startRow, @editor)
-    bodyRow = (@body.match /\n/g).length
+    bodyRow = (@body.match /\n/g).length - 1
 
     nextNonBlankRow = @buffer.nextNonBlankRow(@startRow+1)
 

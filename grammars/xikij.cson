@@ -19,40 +19,40 @@
         ]
   }
   {
-    'begin': '^(\\s*)(~~|~)(?=\\/|$)'
-    'beginCaptures':
+    'match': '^(\\s*)(~~|~)(\\/.*|$)'
+    'captures':
       '2':
         'name': 'variable.language.xikij'
-    'end': '^(?!\\1\\s|\\n)'
-    'patterns': [
-      {
-        'include': '#xikijPath'
-      }
-    ]
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
   }
   {
-    'begin': '^(\\s*)(\\.\\.)(?=\\/|$)'
-    'beginCaptures':
+    'match': '^(\\s*)(\\.\\.)(\\/.*|$)'
+    'captures':
       '2':
         'name': 'constant.directory.parent.xikij'
-    'end': '^(?!\\1\\s|\\n)'
-    'patterns': [
-      {
-        'include': '#xikijPath'
-      }
-    ]
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
   }
   {
-    'begin': '^(\\s*)(\\.)(?=\\/|$)'
-    'beginCaptures':
+    'match': '^(\\s*)(\\.)(\\/.*|$)'
+    'captures':
       '2':
         'name': 'constant.directory.current.xikij'
-    'end': '^(?!\\1\\s|\\n)'
-    'patterns': [
-      {
-        'include': '#xikijPath'
-      }
-    ]
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
   }
   {
     'match': '^\\s*(\\/.*)$'
@@ -63,6 +63,14 @@
             'include': '#xikijPath'
           }
         ]
+  }
+  {
+    'match': '^\\s*((!) .*)'
+    'captures':
+      '1':
+        'name': 'keyword.operator.xikij'
+      '2':
+        'name': 'error.exception.xikij'
   }
   {
     'include': '#shellCommand'
@@ -220,6 +228,101 @@
     'end': '^(?!\\1\\s|\\n)'
   }
   {
+    'contentName': 'meta.embedded.block.source.css.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.css$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.css'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.html.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.html$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.html'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.text.html.php.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.php$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'text.html.php'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.xml.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.xml$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.xml'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.sql.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.sql$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.sql'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
     'contentName': 'meta.embedded.block.source.ruby.xikij'
     'begin': '^(\\s*)(-)\\s(.*/|).*\\.rb$'
     'beginCaptures':
@@ -258,6 +361,25 @@
     'end': '^(?!\\1\\s|\\n)'
   }
   {
+    'contentName': 'meta.embedded.block.source.makefile.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*Makefile$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.makefile'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
     'contentName': 'meta.embedded.block.source.css.less.xikij'
     'begin': '^(\\s*)(-)\\s(.*/|).*\\.less$'
     'beginCaptures':
@@ -272,6 +394,63 @@
     'patterns': [
       {
         'include': 'source.css.less'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.text.markdown.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.md$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'text.markdown'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.cmake.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*\\.cmake$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.cmake'
+      }
+    ]
+    'end': '^(?!\\1\\s|\\n)'
+  }
+  {
+    'contentName': 'meta.embedded.block.source.cmake.xikij'
+    'begin': '^(\\s*)(-)\\s(.*/|).*CMakeLists.txt$'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+      '3':
+        'patterns': [
+          {
+            'include': '#xikijPath'
+          }
+        ]
+    'patterns': [
+      {
+        'include': 'source.cmake'
       }
     ]
     'end': '^(?!\\1\\s|\\n)'
