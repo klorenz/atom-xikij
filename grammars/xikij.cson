@@ -1,10 +1,18 @@
+'fileTypes': [
+  'xikij'
+]
 'name': 'Xikij'
 'scopeName': 'source.xikij'
-'injectionSelector': 'text, source'
+'injectionSelector': 'text, text markup.raw, source string.heredoc, source string.double.heredoc, source string.quoted.double.heredoc, source comment.block'
 'macros':
   'lbNoBackslash': '(?<!\\\\)'
   'laNotIndented': '(?!\\1\\s|\\n)'
   'lbLeftPathSep': '(?<=/|\\s)'
+  'csonNumeric': '\\b((0([box])[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?(e[+\\-]?[0-9]+)?))\\b'
+  'csonTrue': '\\b(true|on|yes)\\b'
+  'csonFalse': '\\b(false|off|no)\\b'
+  'csonNull': '\\b(null)\\b'
+  'laCson': '(?=(?:""".*|\'\'\'.*|".*"|\'.*\'|\\b((0([box])[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?(e[+\\-]?[0-9]+)?))\\b|\\b(true|on|yes)\\b|\\b(false|off|no)\\b|\\b(null)\\b)\\s*$)'
 'patterns': [
   {
     'match': '^(\\s*)(\\+)\\s(.*)$'
@@ -53,6 +61,46 @@
             'include': '#xikijPath'
           }
         ]
+  }
+  {
+    'begin': '^(\\s*)(?=(?:""".*|\'\'\'.*|".*"|\'.*\'|\\b((0([box])[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?(e[+\\-]?[0-9]+)?))\\b|\\b(true|on|yes)\\b|\\b(false|off|no)\\b|\\b(null)\\b)\\s*$)'
+    'applyEndPatternLast': true
+    'end': '(?=[\\s\\S])'
+    'patterns': [
+      {
+        'include': '#cson'
+      }
+    ]
+  }
+  {
+    'begin': '^(\\s*)([\\w\\-]+)(:)\\s+(?=(?:""".*|\'\'\'.*|".*"|\'.*\'|\\b((0([box])[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?(e[+\\-]?[0-9]+)?))\\b|\\b(true|on|yes)\\b|\\b(false|off|no)\\b|\\b(null)\\b)\\s*$)'
+    'beginCaptures':
+      '2':
+        'name': 'entity.name.xikij'
+      '3':
+        'name': 'keyword.operator.definition.xikij'
+    'patterns': [
+      {
+        'include': '#cson'
+      }
+    ]
+    'applyEndPatternLast': true
+    'end': '(?=[\\s\\S])'
+  }
+  {
+    'match': '^(\\s*)([\\w\\-]+)(:)(?=\\s|$)'
+    'captures':
+      '2':
+        'name': 'entity.name.xikij'
+      '3':
+        'name': 'keyword.operator.definition.xikij'
+    'patterns': [
+      {
+        'include': '#cson'
+      }
+    ]
+    'applyEndPatternLast': true
+    'end': '(?=[\\s\\S])'
   }
   {
     'match': '^\\s*(\\/.*)$'
@@ -152,7 +200,7 @@
     'end': '^(?!\\1\\s|\\n)'
   }
   {
-    'contentName': 'meta.embedded.block.source.c++.xikij'
+    'contentName': 'meta.embedded.block.source.cpp.xikij'
     'begin': '^(\\s*)(-)\\s(.*/|).*\\.(cc|cxx|cpp|hh|hxx|hpp|inc|inl|imp|impl)$'
     'beginCaptures':
       '2':
@@ -165,7 +213,7 @@
         ]
     'patterns': [
       {
-        'include': 'source.c++'
+        'include': 'source.cpp'
       }
     ]
     'end': '^(?!\\1\\s|\\n)'
@@ -456,16 +504,29 @@
     'end': '^(?!\\1\\s|\\n)'
   }
   {
-    'match': '^(\\s*)(-)\\s(.*)$'
-    'captures':
+    'begin': '^(\\s*)(-)\\s(?=(?:""".*|\'\'\'.*|".*"|\'.*\'|\\b((0([box])[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?(e[+\\-]?[0-9]+)?))\\b|\\b(true|on|yes)\\b|\\b(false|off|no)\\b|\\b(null)\\b)\\s*$)'
+    'beginCaptures':
       '2':
         'name': 'keyword.operator.xikij'
-      '3':
-        'patterns': [
-          {
-            'include': '#xikijPath'
-          }
-        ]
+    'applyEndPatternLast': true
+    'end': '(?=[\\s\\S])'
+    'patterns': [
+      {
+        'include': '#cson'
+      }
+    ]
+  }
+  {
+    'begin': '^(\\s*)(-)\\s(?=.*$)'
+    'beginCaptures':
+      '2':
+        'name': 'keyword.operator.xikij'
+    'end': '$'
+    'patterns': [
+      {
+        'include': '#xikijPath'
+      }
+    ]
   }
 ]
 'repository':
@@ -536,5 +597,58 @@
       {
         'match': '(?i).*\\berror\\b.*'
         'name': 'error.xikij'
+      }
+    ]
+  'cson':
+    'patterns': [
+      {
+        'include': '#csonSingleLineString'
+      }
+      {
+        'match': '\\b((0([box])[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?(e[+\\-]?[0-9]+)?))\\b\\s*$'
+        'name': 'constant.numeric.xikij'
+      }
+      {
+        'match': '\\b(true|on|yes)\\b\\s*$'
+        'captures':
+          '1':
+            'name': 'constant.language.boolean.true.xikij'
+      }
+      {
+        'match': '\\b(false|off|no)\\b\\s*$'
+        'captures':
+          '1':
+            'name': 'constant.language.boolean.false.xikij'
+      }
+      {
+        'match': '\\b(null)\\b\\s*$'
+        'captures':
+          '1':
+            'name': 'constant.language.boolean.null.xikij'
+      }
+    ]
+  'csonSingleLineString':
+    'patterns': [
+      {
+        'begin': '(")(?=.*"\\s*$)'
+        'beginCaptures':
+          '1':
+            'name': 'punctuation.definition.string.begin.xikij'
+        'end': '(")'
+        'endCaptures':
+          '1':
+            'name': 'punctuation.definition.string.end.xikij'
+        'name': 'string.quoted.double.xikij'
+      }
+      {
+        'begin': '(\')(?=.*\'\\s*$)'
+        'beginCaptures':
+          '1':
+            'name': 'punctuation.definition.string.begin.xikij'
+        'end': '(\')'
+        'endCaptures':
+          '1':
+            'name': 'punctuation.definition.string.end.xikij'
+        'name': 'string.quoted.single.xikij'
       }
     ]
