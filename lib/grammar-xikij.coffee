@@ -36,7 +36,7 @@ highlight_expanded_file = (suffix, scope) ->
 grammar =
   name: "Xikij"
   scopeName: "source.xikij"
-  injectionSelector: "text, text markup.raw, source string.heredoc, source string.double.heredoc, source string.quoted.double.heredoc, source comment.block"
+  injectionSelector: "text, text markup.raw, source string.heredoc, source string.double.heredoc, source string.quoted.double.heredoc, source comment.block, source.gfm, source markup.raw"
   fileTypes: ["xikij"]
 
   # Lookbehinds are not supported by javascript regexes, so use macros for
@@ -291,7 +291,7 @@ grammar =
       ]
     csonSingleLineString: [
       {
-        b: /(")(?=.*"\s*$)/
+        b: '(?<!")(")(?!"")(?=.*"\\s*$)'
         c:
           1: "punctuation.definition.string.begin"
         e: /(")/
@@ -300,7 +300,7 @@ grammar =
         n: "string.quoted.double"
       }
       {
-        b: /(')(?=.*'\s*$)/
+        b: "(?<!')(')(?!'')(?=.*'\\s*$)"
         c:
           1: "punctuation.definition.string.begin"
         e: /(')/

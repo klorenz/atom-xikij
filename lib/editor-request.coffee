@@ -4,6 +4,8 @@ uuid = require 'uuid'
 
 INDENT = "  "
 
+cleanup = (text) -> text.replace /\r/, ''
+
 class EditorRequest
   constructor: ({@atomXikij, @editor, @cursor, @startRow, @withInput, @withPrompt}) ->
     @inputRange = null
@@ -69,7 +71,7 @@ class EditorRequest
     startRow = aRow
     if @buffer.lineForRow(startRow).match /^\s*$/
       row = @buffer.nextNonBlankRow(startRow)
-      console.log("nextNonBlankRow", startRow, row)
+      #console.log("nextNonBlankRow", startRow, row)
     else
       row = startRow
 
@@ -96,7 +98,7 @@ class EditorRequest
 
     range = @buffer.rangeForRow(row, yes)
     range.start.row = startRow
-    console.log "range", range
+    #console.log "range", range
     range
 
   # collapse request handler
@@ -137,7 +139,7 @@ class EditorRequest
 
     util.indented(response.data, "#{@indent}#{response.indent}")
       .on "data", (data) =>
-        data = data.toString()
+        data = cleanup(data.toString())
 
         @buffer.insert([row, col], data)
 
@@ -195,7 +197,7 @@ class EditorRequest
     done()
 
   applyResponse: (response, done) ->
-    console.log "response (#{response.type})", response
+    #console.log "response (#{response.type})", response
     handler = "apply_#{response.type}"
     if handler of @
       @[handler] response, done
@@ -204,7 +206,9 @@ class EditorRequest
 
   # run editor request having @cursor of @editor at @startRow
   run: ->
-    console.log "run"
+    # TODO if first line does not end with \n, append it
+
+    #console.log "run"
     xikiNodePath = []
     startRow = @startRow
 
@@ -233,10 +237,10 @@ class EditorRequest
       nextNonBlankRow = @startRow
 
 
-    console.log "curIndent", curIndent
-    console.log "nextIndent", nextIndent
-    console.log "nonbIndent", nonbIndent
-    console.log "nextNonBlankRow", nextNonBlankRow
+    #console.log "curIndent", curIndent
+    #console.log "nextIndent", nextIndent
+    #console.log "nonbIndent", nonbIndent
+    #console.log "nextNonBlankRow", nextNonBlankRow
 
     return @expand() if curIndent == nextIndent
 
@@ -246,8 +250,8 @@ class EditorRequest
 
       nextNonBlankRow = @startRow + 1
 
-    console.log "startRow", startRow
-    console.log "nextNonBlankRow", nextNonBlankRow
+    #console.log "startRow", startRow
+    #console.log "nextNonBlankRow", nextNonBlankRow
 
     # collapse - if requested
     if @startRow+1 < @editor.getLineCount() and not @withInput

@@ -3,7 +3,7 @@
 ]
 'name': 'Xikij'
 'scopeName': 'source.xikij'
-'injectionSelector': 'text, text markup.raw, source string.heredoc, source string.double.heredoc, source string.quoted.double.heredoc, source comment.block'
+'injectionSelector': 'text, text markup.raw, source string.heredoc, source string.double.heredoc, source string.quoted.double.heredoc, source comment.block, source.gfm, source markup.raw'
 'macros':
   'lbNoBackslash': '(?<!\\\\)'
   'laNotIndented': '(?!\\1\\s|\\n)'
@@ -630,7 +630,7 @@
   'csonSingleLineString':
     'patterns': [
       {
-        'begin': '(")(?=.*"\\s*$)'
+        'begin': '(?<!")(")(?!"")(?=.*"\\s*$)'
         'beginCaptures':
           '1':
             'name': 'punctuation.definition.string.begin.xikij'
@@ -641,7 +641,7 @@
         'name': 'string.quoted.double.xikij'
       }
       {
-        'begin': '(\')(?=.*\'\\s*$)'
+        'begin': '(?<!\')(\')(?!\'\')(?=.*\'\\s*$)'
         'beginCaptures':
           '1':
             'name': 'punctuation.definition.string.begin.xikij'
