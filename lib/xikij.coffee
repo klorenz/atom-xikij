@@ -15,6 +15,7 @@ module.exports =
   activate: (state) ->
     @xikij = null
     @processing = {}
+    @prompts = []
 
     #@xikijView = new XikijView(state.xikijViewState)
     atom.workspaceView.command "xikij:toggle", => @toggle()
@@ -23,6 +24,13 @@ module.exports =
     atom.workspaceView.command "xikij:goto-level-up-and-run-with-input", =>
       @gotoLevelUp()
       @toggleContent withInput: true
+
+    atom.workspaceView.command "xikij:item-get-help", =>
+      @toggleContent append: "?"
+
+    atom.workspaceView.command "xikij:item-get-attributes", =>
+      @toggleContent append: "*"
+
     atom.workspaceView.command "xikij:run-with-prompt", =>
       @toggleContent withPrompt: true
 
@@ -46,6 +54,9 @@ module.exports =
     else
       $wv.addClass "xikij"
       @xikij = new XikijClient
+      # have to reload this from time to time maybe interval of some seconds
+      @xikij.getPrompts().then (prompts) =>
+        @prompts = prompts
 
   request: (request, args...) ->
     request.args = {} unless request.args?
@@ -115,7 +126,7 @@ module.exports =
       #console.log "cursor", i, cursor
 
   toggleContent: (opts) ->
-    {withPrompt, withInput} = opts ? {}
+    {withPrompt, withInput, append} = opts ? {}
     editor = atom.workspace.getActiveEditor()
     return unless editor
 
@@ -126,12 +137,39 @@ module.exports =
       startRow = cursor.getBufferRow()
       continue if startRow in rows
 
-      cursor.setBufferPosition([startRow, 0])
+      # if withPrompt
+      #     pos = cursor.getBufferPosition()
+      #
+      #
+      #
+      #
+      #     console.debug "scopes", scopes
+      #     isCommand = false
+      #     for scope in scopes
+      #       if scope.match /\.command/
+      #         isCommand = true
+      #         break
+      #     console.debug "isCommand", isCommand
+      #
+      #     if not isCommand
+      #       row = cursor.getBufferRow()
+      #       indentLevel = editor.indentationForBufferRow(row)
+      #       editor.getBuffer().insert pos, "\n", normalizeLineEndings: true
+      #       #cursor.moveDown()
+      #       console.debug "inserted newline"
+      #       editor.setIndentationForBufferRow(row+1, indentLevel)
+      #       cursor.moveToEndOfLine()
+      #       return
+
+      # is this needed?
+      #cursor.setBufferPosition([startRow, 0])
 
       # put row number on list of processed rows
       rows.push startRow
 
-      opts = {atomXikij: @, editor, cursor, startRow, withInput, withPrompt}
+      console.log "============ xikij request"
+
+      opts = {atomXikij: @, editor, cursor, startRow, withInput, withPrompt, append}
       req  = new EditorRequest(opts)
       req.run()
 

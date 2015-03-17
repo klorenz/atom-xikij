@@ -7,9 +7,13 @@ INDENT = "  "
 cleanup = (text) -> text.replace /\r/, ''
 
 class EditorRequest
-  constructor: ({@atomXikij, @editor, @cursor, @startRow, @withInput, @withPrompt}) ->
+  constructor: ({@atomXikij, @editor, @cursor, @startRow, @withInput, @withPrompt, @append}) ->
     @inputRange = null
     @buffer = @editor.getBuffer()
+    @range  = @cursor.getCurrentLineBufferRange includeNewline: yes
+    @mark   = @editor.markBufferRange(@range)
+    @line   = @buffer.getTextInRange(@range)
+    @indent = util.getIndent @line
 
   # get ready for request and perform it
   request: (action, callback) ->
@@ -24,16 +28,20 @@ class EditorRequest
     for k,v of @args
       args[k] = v
 
-    @range  = @cursor.getCurrentLineBufferRange includeNewline: yes
-    @mark   = @editor.markBufferRange(@range)
+    #@range      = @cursor.getCurrentLineBufferRange includeNewline: yes
+    #@line       = @buffer.getTextInRange(@range)
     @decoration = @editor.decorateMarker(@mark, {type: 'line', class: 'xikij-request'})
-    @line   = @buffer.getTextInRange(@range)
-    @indent = util.getIndent @line
 
     @id = uuid.v4()
     @atomXikij.processing[@id] = @
 
     @body = "" unless @body
+
+    if @append
+      if @body.match /\n/
+        @body = @body.replace /\n/, "#{@append}\n"
+      else
+        @body += @append
 
     @atomXikij.request {@body, args, action}, (response) =>
       unless @body
@@ -46,6 +54,7 @@ class EditorRequest
         # text = "  "+response.data.replace "\n", "\n  "
         # editor.getBuffer().insert(range.end, text
         @mark.destroy()
+        #@atomXikij.pushMark(@mark)
         delete @atomXikij.processing[@id]
 
   # switches line marking from `from` to `to`
@@ -117,20 +126,59 @@ class EditorRequest
       @applyResponse(response, done)
 
   expand: ->
+    if @withPrompt
+      debugger
+      #row = @cursor.getBufferRow()
+      #line = @editor.lineTextForBufferRow(row)
+      console.log "command withPrompt"
+      stripped = util.strip(@line)
+      console.log "stripped", stripped
+      isPrompt = false
+      for prompt in @atomXikij.prompts
+        console.log "hasPrompt?", prompt
+        if util.startsWith stripped, prompt
+          isPrompt = true
+          break
+
+      if not isPrompt
+        console.log "no prompt"
+        row = @cursor.getBufferRow()
+        indentLevel = @editor.indentationForBufferRow(row)
+        pos = @cursor.getBufferPosition()
+        @editor.getBuffer().insert pos, "\n", normalizeLineEndings: true
+        console.log "inserted new line"
+        @editor.setIndentationForBufferRow(row+1, indentLevel)
+        pos = @cursor.getBufferPosition()
+        return
+
+      console.log "insert prompt", prompt
+      @cursor.moveToEndOfLine()
+      @buffer.insert(@cursor.getBufferPosition(), "\n" + @indent + prompt + "\n")
+      @cursor.moveLeft()
+
+      # redo the mark
+      row = @mark.getStartBufferPosition().row
+      @mark.destroy()
+
+      @range = @buffer.rangeForRow(row, includeNewline: yes)
+      @mark = @editor.markBufferRange(@range)
+    else
+      @cursor.setBufferPosition([@range.end.row, 0])
+
     @request "expand", (response, done) =>
       @markLine "+", "-"
+      debugger
       @applyResponse response, done
 
   apply_stream: (response, done) ->
     isFirst = true
 
     # this range is always about the row, the user wants to be executed
-    row = @range.end.row
-    if row == @range.start.row
+    row = @mark.getEndBufferPosition().row
+
+    if row == @mark.getStartBufferPosition().row
       if @buffer.lineEndingForRow(row) is ""
-        @buffer.insert(@range.end, "\n")
-        @range.end.column += 1
-        row = @range.end.row+1
+        @buffer.insert(@mark.getEndBufferPosition(), "\n")
 
     col = 0
     hadLF = false
@@ -141,20 +189,23 @@ class EditorRequest
       .on "data", (data) =>
         data = cleanup(data.toString())
 
-        @buffer.insert([row, col], data)
+        @buffer.insert(@mark.getEndBufferPosition(), data)
 
-        if /\n/.test data
-          m = /\n(.*)$/.exec data
-          col = m[1].length
-          row += data.match(/\n/g).length
-        else
-          col = data.length
+        # @buffer.insert([row, col], data)
+        #
+        # if /\n/.test data
+        #   m = /\n(.*)$/.exec data
+        #   col = m[1].length
+        #   row += data.match(/\n/g).length
+        # else
+        #   col = data.length
 
         hadLF = /\n$/.test data
 
       .on "end", =>
         unless hadLF
-          @buffer.insert([row, col], "\n")
+          @buffer.insert(@mark.getEndBufferPosition(), "\n")
+          #@buffer.insert([row, col], "\n")
         # request.cursor.setBufferPosition request.args.position
         done()
 
@@ -169,7 +220,7 @@ class EditorRequest
 
     text = util.indented(result, "#{@indent}#{response.indent}")
     text += "\n" unless /\n$/.test text
-    @buffer.insert(@range.end, text)
+    @buffer.insert(@mark.getEndBufferPosition(), text)
     done()
 
   apply_array: (response, done) ->
@@ -179,7 +230,7 @@ class EditorRequest
 
     text = util.indented(result, "#{@indent}#{response.indent}")
     text += "\n" unless /\n$/.test text
-    @buffer.insert(@range.end, text)
+    @buffer.insert(@mark.getEndBufferPosition(), text)
     done()
 
   apply_default: (response, done) ->
@@ -187,13 +238,13 @@ class EditorRequest
 
     text = util.indented(response.data, "#{@indent}#{response.indent}")
     text += "\n" unless /\n$/.test text
-    @buffer.insert(@range.end, text)
+    @buffer.insert(@mark.getEndBufferPosition(), text)
     done()
 
   apply_error: (response, done) ->
     text = util.indented(response.data.stack, "#{@indent}#{response.indent}! ")
     text += "\n" unless /\n$/.test text
-    @buffer.insert(@range.end, text)
+    @buffer.insert(@mark.getEndBufferPosition(), text)
     done()
 
   applyResponse: (response, done) ->
@@ -260,6 +311,11 @@ class EditorRequest
         @curIndent += 1
 
         return @collapse()
+
+    #@cursor.setBufferPosition([@range.end.row, 0])
+
+
+      # ../../xikij
 
     # expand - with input
     if @startRow+1 < @editor.getLineCount() and @withInput
