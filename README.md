@@ -19,9 +19,23 @@ Xikij is a xiki clone for atom under very development.
 - program execution works.  E.g. hit `ctrl-enter` on following line:
   ```
   $ ps -ef
+
+  ```
+
+- prompts work. hit `enter` on following line:
+  ```
+  $ ls
+
+  ```
+
+- multicursor prompts work:
+  ```
+  $ ls /home
+  $ ls /tmp
   ```
 
 - nested contexts work.  Hit `ctrl-enter` on `$ ls` line:
+
   ```
   /home
     $ ls
@@ -32,13 +46,20 @@ Xikij is a xiki clone for atom under very development.
   + `ip` -- print host's ip to internet
   + `pwd` -- print current working directory
 
+- syntax highlighting of nested opened files
 
-- syntax highlighting of inline opened files
+  ```
+  ~/.atom/packages
+    - atom-xikij/lib/xikij.coffee
+  ```
 
 
 ## Changelog
 
 ... many more changes not yet listed here
+0.8.1
+  - prompt works ($)
+  - multi cursor prompts
 
 0.4.0
   - fix collapsing, keep last empty line
@@ -53,3 +74,43 @@ Xikij is a xiki clone for atom under very development.
 
 0.1.0
   - this is an "internal" release, not ready for use, only for experimenting
+
+
+$ ls
+  CHANGELOG.md
+  grammars
+  keymaps
+  lib
+  LICENSE.md
+  menus
+  node_modules
+  package.json
+  README.md
+  spec
+  stylesheets
+  TODO.md
+
+
+fooo
+
+menu
+  Manage menus.
+
+menu
+  + amazon.coffee
+  + bookmarklet.coffee
+  + contexts
+  + docs
+  + echo.coffee
+  + filepath.coffee
+  + hostname.coffee
+  + inspect.coffee
+  + ip.coffee
+  + log.coffee
+  + menu.coffee
+  + packages.coffee
+  + pwd.coffee
+  + terminal.coffee
+  + fogbugz.coffee
+
+menu  Manage menus.
