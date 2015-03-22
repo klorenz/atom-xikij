@@ -76,41 +76,10 @@ Xikij is a xiki clone for atom under very development.
   - this is an "internal" release, not ready for use, only for experimenting
 
 
+/home/kiwi/
 $ ls
-  CHANGELOG.md
-  grammars
-  keymaps
-  lib
-  LICENSE.md
-  menus
-  node_modules
-  package.json
-  README.md
-  spec
-  stylesheets
-  TODO.md
+$
 
+$
 
-fooo
-
-menu
-  Manage menus.
-
-menu
-  + amazon.coffee
-  + bookmarklet.coffee
-  + contexts
-  + docs
-  + echo.coffee
-  + filepath.coffee
-  + hostname.coffee
-  + inspect.coffee
-  + ip.coffee
-  + log.coffee
-  + menu.coffee
-  + packages.coffee
-  + pwd.coffee
-  + terminal.coffee
-  + fogbugz.coffee
-
-menu  Manage menus.
+$

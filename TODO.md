@@ -28,4 +28,8 @@ TODO
 
 - Completion
 
-- Fix issue with svn commit (the dots are printed in a strange way)
+- On starting a request:
+
+  - mark command line as running "xikij-request-running" (spinner)
+  - mark entire running request as "xikij-response-running" (e.g. bold)
+  - mark response with xikij-response (gutter line)

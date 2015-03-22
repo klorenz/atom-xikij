@@ -8,17 +8,28 @@ cleanup = (text) -> text.replace /\r/, ''
 
 class EditorRequest
   constructor: ({@atomXikij, @editor, @cursor, @startRow, @withInput, @withPrompt, @append}) ->
-    @inputRange = null
+    @inputRange  = null
+
     @buffer = @editor.getBuffer()
-    @range  = @cursor.getCurrentLineBufferRange includeNewline: yes
-    @mark   = @editor.markBufferRange(@range)
+
+    @range  = @cursor.getCurrentLineBufferRange includeNewline: no
     @line   = @buffer.getTextInRange(@range)
     @indent = util.getIndent @line
+
+    nextRow = @range.start.row + 1
+
+    # missing eol
+    unless @buffer.lineEndingForRow(@range.start.row)
+      @buffer.append("\n")
+
+    @requestMark = @editor.markBufferRange(@range, xikijRequest: true)
+    @mark = @editor.markBufferRange([[nextRow, 0], [nextRow, 0]], xikijResponse: true)
+
 
   # get ready for request and perform it
   request: (action, callback) ->
     args = {
-      projectDirs: [ atom.project.rootDirectory.path ]
+      projectDirs: (d.path for d in atom.project.rootDirectories)
       fileName: @editor.getBuffer().file.path
       position: @cursor.getBufferPosition()
     }
@@ -28,9 +39,19 @@ class EditorRequest
     for k,v of @args
       args[k] = v
 
-    #@range      = @cursor.getCurrentLineBufferRange includeNewline: yes
-    #@line       = @buffer.getTextInRange(@range)
-    @decoration = @editor.decorateMarker(@mark, {type: 'line', class: 'xikij-request'})
+    # requestMark decorations will automatically be destroyed
+    @editor.decorateMarker @requestMark,
+      type: 'line', class: 'xikij-request-running'
+
+    @editor.decorateMarker @requestMark,
+      type: 'gutter', class: 'xikij-request-running'
+
+    # to be destroyed after request is done
+    @runningDeco = @editor.decorateMarker @mark,
+      type: 'line', class: 'xikij-response-running'
+
+    # this decoration persists
+    @decoration = @editor.decorateMarker(@mark, {type: 'gutter', class: 'xikij-response'})
 
     @id = uuid.v4()
     @atomXikij.processing[@id] = @
@@ -50,10 +71,25 @@ class EditorRequest
         response.indent = INDENT
 
       callback response, =>
+        console.debug "mark2", @mark.getBufferRange()
+        console.debug "requestMark2", @requestMark.getBufferRange()
         # console.log response
         # text = "  "+response.data.replace "\n", "\n  "
         # editor.getBuffer().insert(range.end, text
-        @mark.destroy()
+
+        if @mark.getBufferRange().isEmpty()
+          @mark.destroy()
+
+        else
+          # make sure mark does not span request line
+          reqStart = @requestMark.getStartBufferPosition()
+          r = @mark.getBufferRange()
+
+          @mark.setBufferRange([[reqStart.row+1, 0], r.end])
+
+        @requestMark.destroy()
+        @runningDeco.destroy()
+
         #@atomXikij.pushMark(@mark)
         delete @atomXikij.processing[@id]
 
@@ -115,6 +151,8 @@ class EditorRequest
     @request "collapse", (response, done) =>
       @markLine("-", "+")
       collapseRange = @getIndentedRange(@startRow+1, @editor)
+      console.debug "collapseRange", collapseRange
+
       @buffer.delete(collapseRange)
       done()
 
@@ -127,47 +165,22 @@ class EditorRequest
 
   expand: ->
     if @withPrompt
-      debugger
-      #row = @cursor.getBufferRow()
-      #line = @editor.lineTextForBufferRow(row)
-      console.log "command withPrompt"
-      stripped = util.strip(@line)
-      console.log "stripped", stripped
-      isPrompt = false
-      for prompt in @atomXikij.prompts
-        console.log "hasPrompt?", prompt
-        if util.startsWith stripped, prompt
-          isPrompt = true
-          break
-
-      if not isPrompt
-        console.log "no prompt"
-        row = @cursor.getBufferRow()
-        indentLevel = @editor.indentationForBufferRow(row)
-        pos = @cursor.getBufferPosition()
-        @editor.getBuffer().insert pos, "\n", normalizeLineEndings: true
-        console.log "inserted new line"
-        @editor.setIndentationForBufferRow(row+1, indentLevel)
-        pos = @cursor.getBufferPosition()
-        return
-
-      console.log "insert prompt", prompt
       @cursor.moveToEndOfLine()
-      @buffer.insert(@cursor.getBufferPosition(), "\n" + @indent + prompt + "\n")
+      @buffer.insert(@cursor.getBufferPosition(), "\n" + @indent + @prompt + "\n")
+
       @cursor.moveLeft()
 
       # redo the mark
-      row = @mark.getStartBufferPosition().row
+      row = @requestMark.getStartBufferPosition().row
       @mark.destroy()
 
       @range = @buffer.rangeForRow(row, includeNewline: yes)
       @mark = @editor.markBufferRange(@range)
-    else
-      @cursor.setBufferPosition([@range.end.row, 0])
+
+#      @cursor.setBufferPosition([@mark.getEndBufferPosition().row, 0])
 
     @request "expand", (response, done) =>
       @markLine "+", "-"
-      debugger
       @applyResponse response, done
 
   apply_stream: (response, done) ->
@@ -176,7 +189,7 @@ class EditorRequest
     # this range is always about the row, the user wants to be executed
     row = @mark.getEndBufferPosition().row
 
-    if row == @mark.getStartBufferPosition().row
+    if row == @requestMark.getStartBufferPosition().row
       if @buffer.lineEndingForRow(row) is ""
         @buffer.insert(@mark.getEndBufferPosition(), "\n")
 
@@ -190,6 +203,8 @@ class EditorRequest
         data = cleanup(data.toString())
 
         @buffer.insert(@mark.getEndBufferPosition(), data)
+
+        console.log "marked range", @mark.getBufferRange()
 
         # @buffer.insert([row, col], data)
         #
@@ -208,6 +223,15 @@ class EditorRequest
           #@buffer.insert([row, col], "\n")
         # request.cursor.setBufferPosition request.args.position
         done()
+
+      .on "error", (error) =>
+        console.log "error", error
+        text = util.indented(error.stack, "#{@indent}  ! ")
+        text += "\n" unless /\n$/.test text
+
+        @buffer.insert(@mark.getEndBufferPosition(), text)
+        done()
+
 
   apply_action: (response, done) ->
     if response.data.action is "message"
@@ -259,6 +283,23 @@ class EditorRequest
   run: ->
     # TODO if first line does not end with \n, append it
 
+    if @withPrompt
+      stripped = util.strip(@line)
+      isPrompt = false
+      for prompt in @atomXikij.prompts
+        if util.startsWith stripped, prompt
+          isPrompt = true
+          @prompt = prompt
+          break
+
+      if not isPrompt
+        row = @cursor.getBufferRow()
+        indentLevel = @editor.indentationForBufferRow(row)
+        pos = @cursor.getBufferPosition()
+        @editor.getBuffer().insert pos, "\n", normalizeLineEndings: true
+        @editor.setIndentationForBufferRow(row+1, indentLevel)
+        return
+
     #console.log "run"
     xikiNodePath = []
     startRow = @startRow
@@ -301,8 +342,8 @@ class EditorRequest
 
       nextNonBlankRow = @startRow + 1
 
-    #console.log "startRow", startRow
-    #console.log "nextNonBlankRow", nextNonBlankRow
+    console.log "startRow", startRow
+    console.log "nextNonBlankRow", nextNonBlankRow
 
     # collapse - if requested
     if @startRow+1 < @editor.getLineCount() and not @withInput

@@ -7,10 +7,10 @@
 
 # For more detailed documentation see
 # https://atom.io/docs/latest/advanced/keymaps
-'.workspace':
+'atom-workspace':
   'ctrl-alt-x': 'xikij:toggle'
 
-'.workspace.xikij .editor:not(.mini)':
+'atom-workspace.xikij atom-pane atom-text-editor:not(.mini)':
   'ctrl-enter': 'xikij:run'
   'ctrl-shift-enter': 'xikij:run-with-input'
   'ctrl-backspace': 'xikij:goto-level-up'
@@ -19,13 +19,13 @@
   'ctrl-j a': 'xikij:item-get-attributes'
 
 #'.workspace.xikij atom-text-editor:not(.mini) .command':
-'.workspace.xikij atom-text-editor:not([mini])':
+'atom-workspace.xikij atom-pane atom-text-editor:not([mini])':
   'enter': 'xikij:run-with-prompt'
 
 #  'ctrl-enter h': 'xikij:item-get-help'
   # 'enter': 'xikij:toggle-content-with-prompt'
 
-'.workspace .editor.xikij:not(.mini)':
+'atom-workspace atom-pane atom-text-editor.xikij:not(.mini)':
   'ctrl-enter': 'xikij:run'
   'ctrl-shift-enter': 'xikij:runwith-input'
   # 'enter': 'xikij:toggle-content-with-prompt'

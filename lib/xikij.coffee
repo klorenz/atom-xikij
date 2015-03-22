@@ -16,25 +16,26 @@ module.exports =
     @xikij = null
     @processing = {}
     @prompts = []
+    @cursorObservers = {}
 
     #@xikijView = new XikijView(state.xikijViewState)
-    atom.workspaceView.command "xikij:toggle", => @toggle()
-    atom.workspaceView.command "xikij:run", => @toggleContent()
-    atom.workspaceView.command "xikij:goto-level-up", => @gotoLevelUp()
-    atom.workspaceView.command "xikij:goto-level-up-and-run-with-input", =>
+    atom.commands.add "atom-workspace", "xikij:toggle", => @toggle()
+    atom.commands.add "atom-workspace", "xikij:run", => @toggleContent()
+    atom.commands.add "atom-workspace", "xikij:goto-level-up", => @gotoLevelUp()
+    atom.commands.add "atom-workspace", "xikij:goto-level-up-and-run-with-input", =>
       @gotoLevelUp()
       @toggleContent withInput: true
 
-    atom.workspaceView.command "xikij:item-get-help", =>
+    atom.commands.add "atom-workspace", "xikij:item-get-help", =>
       @toggleContent append: "?"
 
-    atom.workspaceView.command "xikij:item-get-attributes", =>
+    atom.commands.add "atom-workspace", "xikij:item-get-attributes", =>
       @toggleContent append: "*"
 
-    atom.workspaceView.command "xikij:run-with-prompt", =>
+    atom.commands.add "atom-workspace", "xikij:run-with-prompt", =>
       @toggleContent withPrompt: true
 
-    atom.workspaceView.command "xikij:run-with-input", =>
+    atom.commands.add "atom-workspace", "xikij:run-with-input", =>
       @toggleContent withInput: true
 
     @toggle()
@@ -44,19 +45,50 @@ module.exports =
       return true
     return false
 
+  # attach .xikij class to workspace view and manage cursor observers
   toggle: ->
+    wv = atom.views.getView(atom.workspace)
+    if "xikij" in wv.classList
+      wv.classList.remove("xikij")
 
-    $wv = atom.workspaceView
-    if $wv.hasClass "xikij"
-      $wv.removeClass "xikij"
-      #@xikij.shutdown()
+      for k,v of @cursorObservers
+        v.dispose()
+
+      @cursorObservers = {}
+      @editorObserver.dispose()
+      @editorObserver = null
 
     else
-      $wv.addClass "xikij"
+      wv.classList.add("xikij")
       @xikij = new XikijClient
       # have to reload this from time to time maybe interval of some seconds
       @xikij.getPrompts().then (prompts) =>
         @prompts = prompts
+
+      @editorObserver = atom.workspace.observeTextEditors (editor) =>
+        observer = editor.onDidChangeCursorPosition (event) =>
+          # find out if cursor in a xikijResponse in.  If so, highlight it
+          # in gutter.
+
+          # rather do editor.getDecorations class: "xikij-response"
+          newRow = event.newBufferPosition.row
+          markers = editor.findMarkers xikijResponse: yes, containsBufferPosition: [newRow, 0]
+
+          if markers.length
+            smallest = markers[0]
+            smallest_rc = smallest.getBufferRange().getRowCount()
+
+            for marker in markers
+              rc = marker.getBufferRange().getRowCount()
+              if rc < smallest_rc
+                smallest_rc = rc
+                smallest = marker
+
+        @cursorObservers[editor.id] = observer
+
+        editor.onDidDestroy () =>
+          observer.dispose()
+          delete @cursorObservers[editor.id]
 
   request: (request, args...) ->
     request.args = {} unless request.args?
