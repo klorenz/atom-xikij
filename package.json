@@ -1,7 +1,7 @@
 {
   "name": "atom-xikij",
   "main": "./lib/xikij",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "A xiki clone for atom",
   "repository": "https://github.com/klorenz/atom-xikij",
   "license": "MIT",
