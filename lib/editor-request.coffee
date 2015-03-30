@@ -30,9 +30,10 @@ class EditorRequest
   request: (action, callback) ->
     args = {
       projectDirs: (d.path for d in atom.project.rootDirectories)
-      fileName: @editor.getBuffer().file.path
+      fileName: @editor.getBuffer().file?.path
       position: @cursor.getBufferPosition()
     }
+
 
     extend(args, atom.config.get('atom-xikij'))
 
@@ -235,7 +236,7 @@ class EditorRequest
 
   apply_action: (response, done) ->
     if response.data.action is "message"
-      alert(response.data.message)
+      atom.notifications?.addSuccess response.data.message
 
   apply_object: (response, done) ->
     result = ""

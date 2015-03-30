@@ -57,7 +57,10 @@ Xikij is a xiki clone for atom under very development.
 ## Changelog
 
 ... many more changes not yet listed here
-0.8.1
+0.9.1
+  - fix issue #4
+
+0.9.0
   - prompt works ($)
   - multi cursor prompts
 
@@ -75,11 +78,5 @@ Xikij is a xiki clone for atom under very development.
 0.1.0
   - this is an "internal" release, not ready for use, only for experimenting
 
-
-/home/kiwi/
 $ ls
-$
-
-$
-
 $
