@@ -1,6 +1,6 @@
 {XikijClient, Xikij, util} = require "xikij"
 {EditorRequest} = require './editor-request'
-fs = require 'atom'
+#atom = require 'atom'
 
 INDENT = "  "
 
@@ -93,12 +93,12 @@ module.exports =
   request: (request, args...) ->
     request.args = {} unless request.args?
     unless request.args.filePath?
-      request.args.filePath = atom.workspace.getActiveEditor().getPath()
+      request.args.filePath = atom.workspace.getActiveTextEditor().getPath()
 
     @xikij.request request, args...
 
   getBody: (row, opts={}) ->
-    editor   = opts.editor ? atom.workspace.getActiveEditor()
+    editor   = opts.editor ? atom.workspace.getActiveTextEditor()
     startRow = row
 
     xikiNodePath = []
@@ -139,7 +139,7 @@ module.exports =
 
 
   gotoLevelUp: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     for cursor,i in editor.getCursors()
       startRow = cursor.getBufferRow()
       startIndent = editor.indentationForBufferRow(startRow)
@@ -159,7 +159,7 @@ module.exports =
 
   toggleContent: (opts) ->
     {withPrompt, withInput, append} = opts ? {}
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     return unless editor
 
     # collect nodePath

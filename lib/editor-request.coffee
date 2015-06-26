@@ -297,8 +297,11 @@ class EditorRequest
         row = @cursor.getBufferRow()
         indentLevel = @editor.indentationForBufferRow(row)
         pos = @cursor.getBufferPosition()
-        @editor.getBuffer().insert pos, "\n", normalizeLineEndings: true
-        @editor.setIndentationForBufferRow(row+1, indentLevel)
+        buffer = @editor.getBuffer()
+        if not pos.isEqual buffer.getEndPosition()
+          buffer.insert pos, "\n"
+          @editor.setIndentationForBufferRow(row+1, indentLevel)
+          
         return
 
     #console.log "run"

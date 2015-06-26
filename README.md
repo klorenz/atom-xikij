@@ -53,7 +53,9 @@ Xikij is a xiki clone for atom under very development.
     - atom-xikij/lib/xikij.coffee
   ```
 
-
+[32m✓
+  [39mPublishing atom-xikij@v0.9.1 [32m✓
+  [39m
 ## Changelog
 
 ... many more changes not yet listed here
