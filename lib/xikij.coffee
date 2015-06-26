@@ -148,7 +148,7 @@ module.exports =
 
       curRow = row = startRow
       until row <= 0
-        line = editor.lineForBufferRow(row)
+        line = editor.lineTextForBufferRow(row)
         curRow = row--
         continue if line is ""
         break if startIndent > editor.indentationForBufferRow(curRow)
