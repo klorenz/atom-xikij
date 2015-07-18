@@ -106,17 +106,17 @@ ansiFormatted = (format) ->
 
   return [
     {
-      b: "(?<=\\033\\[|\\d;)(#{start};)"
+      b: "(?<=\\x1B\\[|\\d;)(#{start};)"
       c: { 1: "hidden.ansi-escape-code" }
       N: "terminal.ansi.#{name}#{extra}"
-      e: "(?=\\033\\[((?!#{end};)\\d+;)*#{end}(;\\d+)*m)"
+      e: "(?=\\x1B\\[((?!#{end};)\\d+;)*#{end}(;\\d+)*m)"
       p: [ "#ansiFormats" ]
     }
     {
-      b: "(?<=\\033\\[|\\d;)(#{start}m)"
+      b: "(?<=\\x1B\\[|\\d;)(#{start}m)"
       c: { 1: "hidden.ansi-escape-code" }
       N: "terminal.ansi.#{name}#{extra}"
-      e: "(?=\\033\\[((?!#{end};)\\d+;)*#{end}(;\\d+)*m)"
+      e: "(?=\\x1B\\[((?!#{end};)\\d+;)*#{end}(;\\d+)*m)"
       p: [ "#mainPatterns" ]
     }
   ]
@@ -127,13 +127,13 @@ grammar =
   patterns: [ "#ansiFormatted" ]
   repository:
     ansiFormatted:
-      b: /(\033\[)(?=(\d+;)*\d+m)/
+      b: /(\x1B\[)(?=(\d+;)*\d+m)/
       c: { 1: "hidden.ansi-escape-code" }
 
       n: "meta.ansi-formatted"
 
       L: true
-      e: /(?=\033\[\d+(;\d+)*m)/
+      e: /(?=\x1B\[\d+(;\d+)*m)/
 
       p: "#ansiFormats"
 
